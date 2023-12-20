@@ -1,8 +1,12 @@
 <script setup>
-import axios from 'axios';
+import axios from 'axios'
 import { onMounted, ref, getCurrentInstance, computed, nextTick } from 'vue'
 
-const headers = ref([])
+const headers = ref([
+  { title: 'Boat Type', align: 'start', key: 'name' },
+  { title: 'Date', align: 'center', key: 'creationDate' },
+  { title: 'Actions', align: 'end', key: 'actions' }
+])
 const items = ref([])
 const dialog = ref(false)
 const dialogDelete = ref(false)
@@ -20,19 +24,18 @@ const defaultItem = ref({
 })
 
 const fetchData = async () => {
-      try {
-        console.log("import.meta.env.VUE_APP_API_URL >>",import.meta.env.VUE_APP_API_URL)
-        const response = await axios.get(`http://localhost:8080/api/v1/livreurs`);
-        console.log("response >>",response)
-        headers.value = response.data;
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+  try {
+    console.log('import.meta.env.VUE_APP_API_URL >>', import.meta.env.VUE_APP_API_URL)
+    const response = await axios.get(`http://localhost:8080/api/v1/livreurs`)
+    console.log('response.data >>', response.data)
+    items.value = response.data
+  } catch (error) {
+    console.error('Error fetching data:', error)
+  }
+}
 onMounted(async () => {
   await fetchData()
 })
-
 
 const goToEmployee = (id) => {
   ctx?.proxy.$router.push({ name: 'employee', params: { id } })
@@ -40,7 +43,10 @@ const goToEmployee = (id) => {
 const save = () => {
   console.log('editedItem.value ', editedItem.value.creationDate)
   if (editedIndex.value > -1) {
-    Object.assign(items.value[editedIndex.value], editedItem.value)
+    Object.assign(items.value[editedIndex.value], {
+      ...editedItem.value,
+      creationDate: new Date(editedItem.value.creationDate)
+    })
   } else {
     items.value.push(editedItem.value)
   }
@@ -52,7 +58,10 @@ const formTitle = computed(() => {
 })
 const editItem = (item) => {
   editedIndex.value = items.value.indexOf(item)
-  editedItem.value = Object.assign({}, item)
+  editedItem.value = Object.assign(
+    {},
+    { ...item, creationDate: new Date(item.creationDate).toISOString().slice(0, 16) }
+  )
   dialog.value = true
 }
 
@@ -104,17 +113,29 @@ const closeDelete = () => {
               <v-container>
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.name" label="Name"></v-text-field>
+                    <FormKit
+                    validation="required"
+                    validation-visibility="live"
+    type="text"
+    name="name"
+    id="name"
+    label="Name"
+    help="Your full name"
+    placeholder="“Jon Doe”"
+  />
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
                       v-model="editedItem.creationDate"
-                      type="creationDatetime-local"
+                      type="datetime-local"
                       label="creationDate"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.disponibility" label="Livraisons"></v-text-field>
+                    <v-text-field
+                      v-model="editedItem.disponibility"
+                      label="Livraisons"
+                    ></v-text-field>
                   </v-col>
                 </v-row>
               </v-container>
@@ -139,6 +160,9 @@ const closeDelete = () => {
           </v-card>
         </v-dialog>
       </v-toolbar>
+    </template>
+    <template v-slot:[`item.creationDate`]="{ item }">
+      {{ new Date(item.creationDate).toLocaleDateString() }}
     </template>
     <template v-slot:[`item.actions`]="{ item }">
       <v-icon size="small" class="me-2" @click="editItem(item)"> mdi-pencil </v-icon>
