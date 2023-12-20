@@ -2,6 +2,8 @@ package fr.univrouen.delivery.controller;
 
 import fr.univrouen.delivery.model.Livreur;
 import fr.univrouen.delivery.service.LivreurService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +20,10 @@ public class LivreurController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Livreur>> getAllLivreurs() {
-        return ResponseEntity.ok(livreurService.findAll());
+    public ResponseEntity<Page<Livreur>> getAllLivreurs(Pageable pageable) {
+        return ResponseEntity.ok(livreurService.findAll(pageable));
     }
+
 
     @PostMapping
     public ResponseEntity<Livreur> createLivreur(@RequestBody Livreur livreur) {
