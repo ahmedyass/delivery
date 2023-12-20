@@ -1,4 +1,5 @@
 <script setup>
+import axios from 'axios';
 import { onMounted, ref, getCurrentInstance, computed, nextTick } from 'vue'
 
 const headers = ref([])
@@ -9,81 +10,35 @@ const ctx = getCurrentInstance()
 const editedIndex = ref(-1)
 const editedItem = ref({
   name: '',
-  date: '',
-  deliveries: 0
+  creationDate: '',
+  disponibility: 0
 })
 const defaultItem = ref({
   name: '',
-  date: '',
-  deliveries: 0
+  creationDate: '',
+  disponibility: 0
 })
 
-onMounted(() => {
-  headers.value = [
-    { title: 'Name', align: 'start', key: 'name' },
-    { title: 'Ancienneté ', align: 'center', key: 'date' },
-    { title: 'Nombre de livraison', align: 'center', key: 'deliveries' },
-    { title: 'Action', align: 'end', key: 'actions' }
-  ]
-  items.value = [
-    { id: 1, name: 'datester', date: '2023-11-15T02:30', deliveries: 22 },
-    { id: 2, name: 'OceanMaster', date: '2023-11-15T02:30', deliveries: 35 },
-    {
-      id: 3,
-      name: 'Voyager',
-      date: '2023-11-15T02:30',
-      deliveries: 45
-    },
-    {
-      id: 4,
-      name: 'WaveRunner',
-      date: '2023-11-15T02:30',
-      deliveries: 19
-    },
-    {
-      id: 5,
-      name: 'SeaBreeze',
-      date: '2023-11-15T02:30',
-      deliveries: 31
-    },
-    {
-      id: 6,
-      name: 'HarborGuard',
-      date: '2023-11-15T02:30',
-      deliveries: 50
-    },
-    {
-      id: 7,
-      name: 'SlickFin',
-      date: '2023-11-15T02:30',
-      deliveries: 24
-    },
-    {
-      id: 8,
-      name: 'StormBreaker',
-      date: '2023-11-15T02:30',
-      deliveries: 38
-    },
-    {
-      id: 9,
-      name: 'WindSail',
-      date: '2023-11-15T02:30',
-      deliveries: 55
-    },
-    {
-      id: 10,
-      name: 'FastTide',
-      date: '2023-11-15T02:30',
-      deliveries: 20
-    }
-  ]
+const fetchData = async () => {
+      try {
+        console.log("import.meta.env.VUE_APP_API_URL >>",import.meta.env.VUE_APP_API_URL)
+        const response = await axios.get(`http://localhost:8080/api/v1/livreurs`);
+        console.log("response >>",response)
+        headers.value = response.data;
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+onMounted(async () => {
+  await fetchData()
 })
+
 
 const goToEmployee = (id) => {
   ctx?.proxy.$router.push({ name: 'employee', params: { id } })
 }
 const save = () => {
-  console.log('editedItem.value ', editedItem.value.date)
+  console.log('editedItem.value ', editedItem.value.creationDate)
   if (editedIndex.value > -1) {
     Object.assign(items.value[editedIndex.value], editedItem.value)
   } else {
@@ -153,13 +108,13 @@ const closeDelete = () => {
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                      v-model="editedItem.date"
-                      type="datetime-local"
-                      label="Date"
+                      v-model="editedItem.creationDate"
+                      type="creationDatetime-local"
+                      label="creationDate"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.deliveries" label="Livraisons"></v-text-field>
+                    <v-text-field v-model="editedItem.disponibility" label="Livraisons"></v-text-field>
                   </v-col>
                 </v-row>
               </v-container>
