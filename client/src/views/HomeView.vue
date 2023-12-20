@@ -1,13 +1,13 @@
 <script setup>
 import TheWelcome from '../components/TheWelcome.vue'
-import HelloWorld from '../components/HelloWorld.vue'
+import Dashboard from '../components/Dashboard.vue'
 </script>
 
 <template>
   <div>
     <header>
       <div class="wrapper">
-        <HelloWorld msg="Delivrao App" />
+        <Dashboard msg="Delivrao App" />
       </div>
     </header>
     <main>
