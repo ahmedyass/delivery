@@ -20,10 +20,12 @@ public class LivreurController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Livreur>> getAllLivreurs(Pageable pageable) {
+    public ResponseEntity<Page<Livreur>> getAllLivreurs(@RequestParam(required = false) String name, Pageable pageable) {
+        if (name != null) {
+            return ResponseEntity.ok(livreurService.findByName(name, pageable));
+        }
         return ResponseEntity.ok(livreurService.findAll(pageable));
     }
-
 
     @PostMapping
     public ResponseEntity<Livreur> createLivreur(@RequestBody Livreur livreur) {

@@ -19,6 +19,11 @@ public class LivreurService {
     public Page<Livreur> findAll(Pageable pageable) {
         return livreurRepository.findAll(pageable);
     }
+
+    public Page<Livreur> findByName(String name, Pageable pageable) {
+        return livreurRepository.findByNameContaining(name, pageable);
+    }
+
     public Optional<Livreur> get(Long id) {
         return livreurRepository.findById(id);
     }
