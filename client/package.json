@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@formkit/icons": "^1.4.0",
+    "@formkit/pro": "^0.119.2",
     "@formkit/themes": "^1.4.0",
     "@formkit/vue": "^1.4.0",
     "@mdi/font": "^7.3.67",
