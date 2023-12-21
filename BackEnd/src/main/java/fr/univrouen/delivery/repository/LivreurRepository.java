@@ -8,8 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LivreurRepository extends JpaRepository<Livreur, Long> {
-    Page<Livreur> findAll(Pageable pageable);
-    Page<Livreur> findByNameContaining(String name, Pageable pageable);
-
-
+    //Page<Livreur> findAll(Pageable pageable);
+    Page<Livreur> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }
