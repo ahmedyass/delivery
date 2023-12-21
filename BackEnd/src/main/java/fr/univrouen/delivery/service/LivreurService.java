@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,9 +32,9 @@ public class LivreurService {
         return livreurRepository.findById(id)
                 .map(livreur -> {
                     livreur.setName(livreurDetails.getName());
+                    livreur.setCreationDate(livreurDetails.getCreationDate());
                     livreur.setDisponibility(livreurDetails.getDisponibility());
                     return livreurRepository.save(livreur);
                 });
     }
-
 }
