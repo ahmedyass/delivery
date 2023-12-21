@@ -5,6 +5,7 @@ import { onMounted, ref, getCurrentInstance, computed, nextTick } from 'vue'
 const headers = ref([
   { title: 'Boat Type', align: 'start', key: 'name' },
   { title: 'Date', align: 'center', key: 'creationDate' },
+  { title: 'Disponibilité', align: 'center', key: 'disponibility' },
   { title: 'Actions', align: 'end', key: 'actions' }
 ])
 const items = ref([])
@@ -14,20 +15,23 @@ const ctx = getCurrentInstance()
 const editedIndex = ref(-1)
 const editedItem = ref({
   name: '',
-  creationDate: '',
-  disponibility: 0
+  creationDate: null,
+  disponibility: false
 })
 const defaultItem = ref({
   name: '',
-  creationDate: '',
-  disponibility: 0
+  creationDate: null,
+  disponibility: false
+})
+
+const creationDate = computed({
+  get: () => new Date(editedItem.value.creationDate).toISOString().split('T')[0],
+  set: (creationDate) => editedItem.value.creationDate = creationDate,
 })
 
 const fetchData = async () => {
   try {
-    console.log('import.meta.env.VUE_APP_API_URL >>', import.meta.env.VUE_APP_API_URL)
     const response = await axios.get(`http://localhost:8080/api/v1/livreurs`)
-    console.log('response.data >>', response.data)
     items.value = response.data
   } catch (error) {
     console.error('Error fetching data:', error)
@@ -40,28 +44,44 @@ onMounted(async () => {
 const goToEmployee = (id) => {
   ctx?.proxy.$router.push({ name: 'employee', params: { id } })
 }
-const save = () => {
-  console.log('editedItem.value ', editedItem.value.creationDate)
-  if (editedIndex.value > -1) {
-    Object.assign(items.value[editedIndex.value], {
-      ...editedItem.value,
-      creationDate: new Date(editedItem.value.creationDate)
-    })
-  } else {
-    items.value.push(editedItem.value)
-  }
-  close()
+const create = async ()=>{
+  const response = await axios.post(`http://localhost:8080/api/v1/livreurs`,{
+    
+      name: editedItem.value.name,
+      creationDate: new Date(editedItem.value.creationDate),
+      disponibility: editedItem.value.disponibility
+    
+  })
+  items.value.unshift(response.data)
 }
+const update =async (id)=>{
+
+  const response = await axios.put(`http://localhost:8080/api/v1/livreurs/${id}`,{
+    
+      name: editedItem.value.name,
+      creationDate: new Date(editedItem.value.creationDate),
+      disponibility: editedItem.value.disponibility
+    
+  })
+  items.value.splice(editedIndex.value,1,response.data)
+}
+const save =async () => {
+  if (editedIndex.value > -1) {
+    await update(editedItem.value.id)
+  
+  } else {
+     await create()
+  }
+  dialog.value = false
+}
+
 
 const formTitle = computed(() => {
   return editedIndex.value === -1 ? 'New Item' : 'Edit Item'
 })
 const editItem = (item) => {
   editedIndex.value = items.value.indexOf(item)
-  editedItem.value = Object.assign(
-    {},
-    { ...item, creationDate: new Date(item.creationDate).toISOString().slice(0, 16) }
-  )
+  editedItem.value = Object.assign({}, item)
   dialog.value = true
 }
 
@@ -71,7 +91,8 @@ const deleteItem = (item) => {
   dialogDelete.value = true
 }
 
-const deleteItemConfirm = () => {
+const deleteItemConfirm = async () => {
+   await axios.delete(`http://localhost:8080/api/v1/livreurs/${editedItem.value.id}`)
   items.value.splice(editedIndex.value, 1)
   closeDelete()
 }
@@ -114,28 +135,28 @@ const closeDelete = () => {
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
                     <FormKit
-                    validation="required"
-                    validation-visibility="live"
-    type="text"
-    name="name"
-    id="name"
-    label="Name"
-    help="Your full name"
-    placeholder="“Jon Doe”"
-  />
+                      validation="required"
+                      validation-visibility="live"
+                      type="text"
+                      name="name"
+                      id="name"
+                      label="Name*"
+                      help="Your full name"
+                      placeholder="“Jon Doe”"
+                      v-model="editedItem.name"
+                    />
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.creationDate"
-                      type="datetime-local"
-                      label="creationDate"
-                    ></v-text-field>
+                    <FormKit
+                      type="date"
+                      label="Date de créaction"
+                      help="Entrer la date de création"
+                      v-model="creationDate"
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.disponibility"
-                      label="Livraisons"
-                    ></v-text-field>
+                  <v-col cols="12" sm="6" md="4" style="display:flex;justify-content:center;align-items:center">
+                    <input label="Disponible" type="checkbox" v-model="editedItem.disponibility" />
+                    <strong style="margin-left:0.5em">Disponible</strong> 
                   </v-col>
                 </v-row>
               </v-container>
@@ -162,7 +183,13 @@ const closeDelete = () => {
       </v-toolbar>
     </template>
     <template v-slot:[`item.creationDate`]="{ item }">
-      {{ new Date(item.creationDate).toLocaleDateString() }}
+    {{new Date(item.creationDate).toLocaleDateString()}}
+    </template>
+    <template v-slot:[`item.disponibility`]="{ item }">
+
+      <v-icon size="small" color="success"  v-if="item.disponibility" > mdi-checkbox-marked-circle
+ </v-icon>
+       <v-icon size="small" color="error"  v-if="!item.disponibility" >  mdi-close-circle </v-icon>
     </template>
     <template v-slot:[`item.actions`]="{ item }">
       <v-icon size="small" class="me-2" @click="editItem(item)"> mdi-pencil </v-icon>
