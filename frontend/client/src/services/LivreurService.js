@@ -1,10 +1,13 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:8080/api/v1/livreurs';
+const API_URL = "http://localhost:8080/api/v1/livreurs";
 
 export default {
   getLivreurs(page, size) {
     return axios.get(`${API_URL}?page=${page}&size=${size}`);
+  },
+  searchLivreurs(name, page, size) {
+    return axios.get(`${API_URL}?page=${page}&size=${size}&name=${name}`);
   },
   getLivreur(id) {
     return axios.get(`${API_URL}/${id}`);
