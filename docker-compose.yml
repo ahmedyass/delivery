@@ -21,11 +21,11 @@ services:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
-
+  
   frontend:
-    build: ./client
+    build: ./frontend/client
     ports:
-      - "4200:80"
+      - "4200:8080"
     depends_on:
       - app
 
